@@ -7,7 +7,6 @@ using System.Text;
 using UnityEngine;
 using TMPro;
 using DecorationMaster.Util;
-using ModCommon;
 using DecorationMaster.UI;
 using System.Collections;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;

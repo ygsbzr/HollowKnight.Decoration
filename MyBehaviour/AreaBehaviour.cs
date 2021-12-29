@@ -59,14 +59,11 @@ namespace DecorationMaster.MyBehaviour
                 Destroy(gameObject);
             }
             public string BindBoolValue = nameof(PlayerData.hasLantern);
-            public bool Bind(string name)
-            {
-                return name == BindBoolValue ? false : PlayerData.instance.GetBoolInternal(name);
-            }
+           
             private void OnEnable()
             {
                 if (BindBoolValue != null)
-                    ModHooks.Instance.GetPlayerBoolHook += Bind;
+                    ModHooks.GetPlayerBoolHook += Bind;
                 //noLantern = true;
                 darknessLevel++;
                 StartCoroutine(SetDark());
@@ -78,10 +75,16 @@ namespace DecorationMaster.MyBehaviour
                 
                 
             }
+
+            private bool Bind(string name, bool orig)
+            {
+                return name == BindBoolValue ? false : orig;
+            }
+
             private void OnDisable()
             {
                 if (BindBoolValue != null)
-                    ModHooks.Instance.GetPlayerBoolHook -= Bind;
+                    ModHooks.GetPlayerBoolHook -= Bind;
                 //noLantern = false;
                 darknessLevel--;
                 UpdateDark();

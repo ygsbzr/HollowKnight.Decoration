@@ -2,7 +2,6 @@
 using DecorationMaster.Util;
 using DecorationMaster.Attr;
 using UnityEngine;
-using ModCommon;
 using System.Collections;
 
 namespace DecorationMaster.MyBehaviour

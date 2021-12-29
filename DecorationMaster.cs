@@ -17,7 +17,7 @@ using DecorationMaster.MyBehaviour.Gem;
 namespace DecorationMaster
 {
     public delegate int SelectItem();
-    public class DecorationMaster : Mod,ITogglableMod
+    public class DecorationMaster : Mod,ITogglableMod,IGlobalSettings<GlobalModSettings>
     {
         private float autoSaveTimer = 0;
         private static GameManager _gm;
@@ -84,11 +84,11 @@ namespace DecorationMaster
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += ShowRespawn;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += AutoSaveModification;
             On.GameManager.PositionHeroAtSceneEntrance += HeroOutBoundSave;
-            ModHooks.Instance.LanguageGetHook += DLanguage.MyLanguage;
-            ModHooks.Instance.ApplicationQuitHook += SaveJson;
+            ModHooks.LanguageGetHook += DLanguage.MyLanguage;
+            ModHooks.ApplicationQuitHook += SaveJson;
             if (Settings.CreateMode)
             {
-                ModHooks.Instance.HeroUpdateHook += OperateItem;
+                ModHooks.HeroUpdateHook += OperateItem;
                 if(Settings.ShowRespawnPoint)
                 {
                     On.PlayerData.SetHazardRespawn_HazardRespawnMarker += ShowCurrentRespawnPoint;
@@ -392,6 +392,9 @@ namespace DecorationMaster
             mousePosOnScreen.z = screenPos.z;
             return Camera.main.ScreenToWorldPoint(mousePosOnScreen);
         }
+        public void OnLoadGlobal(GlobalModSettings s) => Settings = s;
+        public GlobalModSettings OnSaveGlobal() => Settings;
+
         public void Unload()
         {
             SaveJson();
@@ -400,10 +403,10 @@ namespace DecorationMaster
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= SpawnFromSettings;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= ShowRespawn;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= AutoSaveModification;
-            ModHooks.Instance.LanguageGetHook -= DLanguage.MyLanguage;
-            ModHooks.Instance.ApplicationQuitHook -= SaveJson;
+            ModHooks.LanguageGetHook -= DLanguage.MyLanguage;
+            ModHooks.ApplicationQuitHook -= SaveJson;
 
-            ModHooks.Instance.HeroUpdateHook -= OperateItem;
+            ModHooks.HeroUpdateHook -= OperateItem;
             On.PlayerData.SetHazardRespawn_HazardRespawnMarker -= ShowCurrentRespawnPoint;
             On.PlayerData.SetHazardRespawn_Vector3_bool -= ShowCurrentRespawnPoint;
             UnityEngine.Object.Destroy(UIObj);
@@ -414,11 +417,6 @@ namespace DecorationMaster
         public GlobalModSettings Settings = new GlobalModSettings();
         public ItemSettings ItemData = new ItemSettings();
         public readonly Dictionary<string, ItemSettings> SceneItemData = new Dictionary<string, ItemSettings>();
-        public override ModSettings GlobalSettings
-        {
-            get => Settings;
-            set => Settings = (GlobalModSettings)value;
-        }
         public override List<(string, string)> GetPreloadNames() => ObjectLoader.ObjectList.Values.ToList();
         public override string GetVersion()
         {

@@ -6,13 +6,13 @@ using DecorationMaster.Util;
 namespace DecorationMaster
 {
     [Serializable]
-    public class SaveModSettings : ModSettings
+    public class SaveModSettings 
     {
 
     }
 
     [Serializable]
-    public class GlobalModSettings : ModSettings
+    public class GlobalModSettings 
     {
         public bool CreateMode = false;
         public bool ShowRespawnPoint = true;

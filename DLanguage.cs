@@ -7,13 +7,13 @@ namespace DecorationMaster
 {
     public static class DLanguage
     {
-        public static string MyLanguage(string key,string sheetTitle)
+        public static string MyLanguage(string key,string sheetTitle,string orig)
         {
             if(MyLan.ContainsKey(key))
             {
                 return MyLan[key];
             }
-            return OLan.GetInternal(key, sheetTitle);
+            return orig;
         }
 
         public static Dictionary<string, string> MyLan = new Dictionary<string, string>()

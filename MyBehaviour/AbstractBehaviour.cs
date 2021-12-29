@@ -242,20 +242,24 @@ namespace DecorationMaster.MyBehaviour
             if (BindBoolValue != null)
             {
                 HUD.AddBindIcon(gameObject);
-                ModHooks.Instance.GetPlayerBoolHook += Bind;
+                ModHooks.GetPlayerBoolHook += Bind;
             }
         }
+
+        private bool Bind(string name, bool orig)
+        {
+
+            return name == BindBoolValue ? false : orig;
+        }
+
         private void OnDisable()
         {
             if (BindBoolValue != null)
             { 
-                ModHooks.Instance.GetPlayerBoolHook -= Bind;
+                ModHooks.GetPlayerBoolHook -= Bind;
             }
         }
-        public bool Bind(string name)
-        {
-            return name == BindBoolValue ? false : PlayerData.instance.GetBoolInternal(name);
-        }
+        
 
     }
     
@@ -281,17 +285,19 @@ namespace DecorationMaster.MyBehaviour
             if (BindIntValue != null)
             {
                 HUD.AddBindIcon(gameObject);
-                ModHooks.Instance.GetPlayerIntHook += Bind;
+                ModHooks.GetPlayerIntHook += Bind;
             }
         }
+
+        private int Bind(string name, int orig)
+        {
+            return (name == BindIntValue) ? 0 : orig;
+        }
+
         private void OnDisable()
         {
             if (BindIntValue != null)
-                ModHooks.Instance.GetPlayerIntHook -= Bind;
-        }
-        public int Bind(string name)
-        {
-            return name == BindIntValue ? 0 : PlayerData.instance.GetIntInternal(name);
+                ModHooks.GetPlayerIntHook -= Bind;
         }
     }
     public abstract class BreakableIntBinding : IntBinding
