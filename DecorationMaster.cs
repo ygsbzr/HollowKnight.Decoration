@@ -13,16 +13,17 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using DecorationMaster.UI;
 using DecorationMaster.Util;
-
+using DecorationMaster.MyBehaviour.Gem;
 namespace DecorationMaster
 {
     public delegate int SelectItem();
-    public class DecorationMaster : Mod,ITogglableMod
+    public class DecorationMaster : Mod,ITogglableMod,IGlobalSettings<GlobalModSettings>
     {
         private float autoSaveTimer = 0;
         private static GameManager _gm;
         private GameObject UIObj;
         private Vector2 mousePos;
+        private GameObject _current_respawn = null;
 
         public static DecorationMaster instance;
         public SelectItem SelectGetter;
@@ -31,8 +32,7 @@ namespace DecorationMaster
         {
             instance = this;
 
-            //new Test();
-            //return;
+
 
             #region VerifyVersion
             Logger.Log("Load Global Json");
@@ -67,6 +67,7 @@ namespace DecorationMaster
             BehaviourProcessor.RegisterSharedBehaviour<DefaultBehaviour>();
             BehaviourProcessor.RegisterSharedBehaviour<UnVisableBehaviour>();
             BehaviourProcessor.RegisterSharedBehaviour<DelayResizableBehaviour>();
+            BehaviourProcessor.RegisterSharedBehaviour<TransitionGem>();
             #endregion
 
             #region InitGUI
@@ -83,14 +84,56 @@ namespace DecorationMaster
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += ShowRespawn;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += AutoSaveModification;
             On.GameManager.PositionHeroAtSceneEntrance += HeroOutBoundSave;
-            ModHooks.Instance.LanguageGetHook += DLanguage.MyLanguage;
-            ModHooks.Instance.ApplicationQuitHook += SaveJson;
+            ModHooks.LanguageGetHook += DLanguage.MyLanguage;
+            ModHooks.ApplicationQuitHook += SaveJson;
             if (Settings.CreateMode)
-                ModHooks.Instance.HeroUpdateHook += OperateItem;
+            {
+                ModHooks.HeroUpdateHook += OperateItem;
+                if(Settings.ShowRespawnPoint)
+                {
+                    On.PlayerData.SetHazardRespawn_HazardRespawnMarker += ShowCurrentRespawnPoint;
+                    On.PlayerData.SetHazardRespawn_Vector3_bool += ShowCurrentRespawnPoint;
+                }
+            }
+                
             #endregion
 
             UserLicense.ShowLicense();
             
+        }
+
+        private void ShowCurrentRespawnPoint(Vector3 position)
+        {
+            if (HeroController.instance == null)
+                return;
+
+            LogDebug("Reflesh HzRespawn "+position.ToString());
+
+            UnityEngine.Object.Destroy(_current_respawn);
+
+            //GUIController.Instance.images["lineEdge"];
+            _current_respawn = new GameObject("HzShow");
+            var tex = GUIController.Instance.images["knight_idle"];
+            _current_respawn.AddComponent<SpriteRenderer>().sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+
+            //_current_respawn.transform.SetPosition2D(HeroController.instance.FindGroundPoint(position, true));
+            NameDisp.Create(_current_respawn, "spawn here");
+
+            RaycastHit2D raycastHit2D = Physics2D.Raycast(position, Vector2.down, 50, 256);
+            _current_respawn.transform.SetPosition2D(raycastHit2D.point.x,raycastHit2D.point.y+0.7f);
+
+        }
+
+        private void ShowCurrentRespawnPoint(On.PlayerData.orig_SetHazardRespawn_Vector3_bool orig, PlayerData self, Vector3 position, bool facingRight)
+        {
+            orig(self, position, facingRight);
+            ShowCurrentRespawnPoint(position);
+        }
+
+        private void ShowCurrentRespawnPoint(On.PlayerData.orig_SetHazardRespawn_HazardRespawnMarker orig, PlayerData self, HazardRespawnMarker location)
+        {
+            orig(self, location);
+            ShowCurrentRespawnPoint(location.transform.position);
         }
 
         private void HeroOutBoundSave(On.GameManager.orig_PositionHeroAtSceneEntrance orig, GameManager self)
@@ -164,7 +207,7 @@ namespace DecorationMaster
                 if (SceneItemData.TryGetValue(GM.sceneName, out var currentSetting))
                     currentSetting.AutoSave();
             }
-            Logger.LogDebug("Save Json");
+            Logger.LogDebug("Save Global Json");
         }
 
         private void ShowRespawn(Scene arg0, LoadSceneMode arg1)
@@ -204,7 +247,7 @@ namespace DecorationMaster
                 {
                     try
                     {
-                        if (ObjectLoader.CloneDecoration(r.pname, r) != null)
+                        if (ObjectLoader.CloneDecoration(r) != null)
                             count++;
                     }
                     catch
@@ -226,7 +269,7 @@ namespace DecorationMaster
                 {
                     try
                     {
-                        if (ObjectLoader.CloneDecoration(r.pname, r) != null)
+                        if (ObjectLoader.CloneDecoration(r) != null)
                             count++;
                     }
                     catch
@@ -260,8 +303,12 @@ namespace DecorationMaster
         }
 
         
-        private void OperateItem()
+        private void OperateItem() //Hero update op
         {
+            if(GM.isPaused || GM.IsInSceneTransition)
+            {
+                return;
+            }
             if(ItemManager.Instance.setupMode)
             {
                 autoSaveTimer += Time.deltaTime;
@@ -269,13 +316,17 @@ namespace DecorationMaster
                 {
                     SaveJson();
                     autoSaveTimer = 0;
-                    Logger.LogDebug("Auto Save");
+                    
                 }
             }
-            if((Input.GetKey(KeyCode.LeftControl)|| Input.GetKey(KeyCode.RightControl)))
+            if((Input.GetKey(KeyCode.LeftControl)|| Input.GetKey(KeyCode.RightControl))) // ctrl组合键
             {
                 if (Input.GetKeyDown(KeyCode.C))
                     ItemManager.Instance.CopyBlock();
+                else if (Input.GetKeyDown(KeyCode.M))
+                    ItemManager.Instance.MoveBlock();
+                else if (Input.GetKeyDown(KeyCode.D))
+                    ItemManager.Instance.DelBlock();
                 else if (Input.GetKeyDown(KeyCode.Z))
                     ItemManager.Instance.DiscardLast();
             }
@@ -297,7 +348,7 @@ namespace DecorationMaster
                 ItemManager.Instance.Operate(Operation.SetPos, mousePos);
             }
 
-            if(GM != null && !GM.isPaused && !GM.IsInSceneTransition)
+            if(GM != null)
             {
                 if (Input.GetMouseButtonUp((int)MouseButton.Left)) // Confirm Go
                 {
@@ -341,6 +392,9 @@ namespace DecorationMaster
             mousePosOnScreen.z = screenPos.z;
             return Camera.main.ScreenToWorldPoint(mousePosOnScreen);
         }
+        public void OnLoadGlobal(GlobalModSettings s) => Settings = s;
+        public GlobalModSettings OnSaveGlobal() => Settings;
+
         public void Unload()
         {
             SaveJson();
@@ -349,9 +403,12 @@ namespace DecorationMaster
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= SpawnFromSettings;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= ShowRespawn;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= AutoSaveModification;
-            ModHooks.Instance.LanguageGetHook -= DLanguage.MyLanguage;
-            ModHooks.Instance.ApplicationQuitHook -= SaveJson;
-            ModHooks.Instance.HeroUpdateHook -= OperateItem;
+            ModHooks.LanguageGetHook -= DLanguage.MyLanguage;
+            ModHooks.ApplicationQuitHook -= SaveJson;
+
+            ModHooks.HeroUpdateHook -= OperateItem;
+            On.PlayerData.SetHazardRespawn_HazardRespawnMarker -= ShowCurrentRespawnPoint;
+            On.PlayerData.SetHazardRespawn_Vector3_bool -= ShowCurrentRespawnPoint;
             UnityEngine.Object.Destroy(UIObj);
             #endregion
 
@@ -360,11 +417,6 @@ namespace DecorationMaster
         public GlobalModSettings Settings = new GlobalModSettings();
         public ItemSettings ItemData = new ItemSettings();
         public readonly Dictionary<string, ItemSettings> SceneItemData = new Dictionary<string, ItemSettings>();
-        public override ModSettings GlobalSettings
-        {
-            get => Settings;
-            set => Settings = (GlobalModSettings)value;
-        }
         public override List<(string, string)> GetPreloadNames() => ObjectLoader.ObjectList.Values.ToList();
         public override string GetVersion()
         {
@@ -384,7 +436,7 @@ namespace DecorationMaster
         public KeyCode ToggleEdit => Settings.ToggleEditKey;
         public KeyCode SwitchGroup => Settings.SwitchGroupKey;
 
-        public const float Version = 0.40f;
+        public const float Version = 0.50f;
     }
     public static class Logger
     {

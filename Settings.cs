@@ -6,20 +6,22 @@ using DecorationMaster.Util;
 namespace DecorationMaster
 {
     [Serializable]
-    public class SaveModSettings : ModSettings
+    public class SaveModSettings 
     {
 
     }
 
     [Serializable]
-    public class GlobalModSettings : ModSettings
+    public class GlobalModSettings 
     {
         public bool CreateMode = false;
+        public bool ShowRespawnPoint = true;
         public bool ProfessorMode = false;
         public bool MemeItem = false;
         public bool showDesc = true;
         public bool agreeLicense = false;
-        public int HistroyMaxCount = 5;
+        public bool allowSpellRemove = false;
+        public int HistroyMaxCount = 10;
         public KeyCode ToggleEditKey = KeyCode.CapsLock;
         public KeyCode SwitchGroupKey = KeyCode.Tab;
         public KeyCode SetPrefabKey = KeyCode.Space;
@@ -63,6 +65,7 @@ namespace DecorationMaster
                 return;
             SerializeHelper.SaveSceneSettings(this, scene_name);
             modify_counter = 0;
+            Logger.LogDebug("Auto Save");
         }
     }
     public enum Operation
@@ -103,6 +106,10 @@ namespace DecorationMaster
         SetTimeOffset,
 
         SetRate,
+
+        SetId,
+        SetDst,
+        SetText,
     }
     
     [Serializable]

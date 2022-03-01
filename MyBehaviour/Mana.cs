@@ -452,7 +452,7 @@ namespace DecorationMaster.MyBehaviour
                 gameObject.transform.SetParent(HeroController.instance.transform);
                 gameObject.transform.localPosition = Vector3.zero;
                 gameObject.AddComponent<KeepWorldScalePositive>();
-                ModHooks.Instance.AfterPlayerDeadHook += ClearManaPool;
+                ModHooks.AfterPlayerDeadHook += ClearManaPool;
                 GameManager.instance.ResetSemiPersistentObjects += ClearManaPool;
             }
         }
@@ -461,7 +461,7 @@ namespace DecorationMaster.MyBehaviour
         private void OnDestroy()
         {
             GameManager.instance.ResetSemiPersistentObjects -= ClearManaPool;
-            ModHooks.Instance.AfterPlayerDeadHook -= ClearManaPool;
+            ModHooks.AfterPlayerDeadHook -= ClearManaPool;
         }
         private void ClearManaPool()
         {

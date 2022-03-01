@@ -7,7 +7,6 @@ using UnityEngine;
 using DecorationMaster.Attr;
 using System.Collections;
 using Modding;
-using ModCommon;
 namespace DecorationMaster.MyBehaviour
 {
     public class OneShotBehaviour
@@ -32,8 +31,6 @@ namespace DecorationMaster.MyBehaviour
             {
                 
                 au = gameObject.AddComponent<AudioSource>();
-                //var sr = gameObject.AddComponent<SpriteRenderer>();
-                //var col = gameObject.AddComponent<BoxCollider2D>();
                 ht = gameObject.AddComponent<HeroTrigger>();
                 ht.HeroEnter = RecoveOneshot;
                 transform.localScale *= 2;
@@ -49,7 +46,7 @@ namespace DecorationMaster.MyBehaviour
                 used = true;
                 On.HeroController.CanDash += True;
                 On.HeroController.HeroDash += RemoveHook;
-                ModHooks.Instance.TakeDamageHook += remove;
+                ModHooks.TakeDamageHook += remove;
                 au.PlayOneShot(clip);
                 StartCoroutine(Consume());
                 
@@ -76,7 +73,7 @@ namespace DecorationMaster.MyBehaviour
                     //Logger.LogDebug("hazard dmg");
                     On.HeroController.CanDash -= True;
                     On.HeroController.HeroDash -= RemoveHook;
-                    ModHooks.Instance.TakeDamageHook -= remove;
+                    ModHooks.TakeDamageHook -= remove;
                 }
                 return damage;
             }
@@ -91,7 +88,7 @@ namespace DecorationMaster.MyBehaviour
                 orig(self);
                 On.HeroController.CanDash -= True;
                 On.HeroController.HeroDash -= RemoveHook;
-                ModHooks.Instance.TakeDamageHook -= remove;
+                ModHooks.TakeDamageHook -= remove;
             }
         }
         [Decoration("IMG_recoverJump")]
@@ -107,8 +104,6 @@ namespace DecorationMaster.MyBehaviour
             private void Awake()
             {
                 au = gameObject.AddComponent<AudioSource>();
-                //var sr = gameObject.AddComponent<SpriteRenderer>();
-               // var col = gameObject.AddComponent<BoxCollider2D>();
                 ht = gameObject.AddComponent<HeroTrigger>();
                 ht.HeroEnter = RecoveOneshot;
                 transform.localScale *= 2;
@@ -124,7 +119,7 @@ namespace DecorationMaster.MyBehaviour
                 used = true;
                 On.HeroController.CanDoubleJump += True;
                 On.HeroController.DoDoubleJump += RemoveHook;
-                ModHooks.Instance.TakeDamageHook += remove;
+                ModHooks.TakeDamageHook += remove;
                 au.PlayOneShot(clip);
                 StartCoroutine(Consume());
 
@@ -150,7 +145,7 @@ namespace DecorationMaster.MyBehaviour
                     //Logger.LogDebug("hazard dmg");
                     On.HeroController.CanDoubleJump -= True;
                     On.HeroController.DoDoubleJump -= RemoveHook;
-                    ModHooks.Instance.TakeDamageHook -= remove;
+                    ModHooks.TakeDamageHook -= remove;
                 }
                 return damage;
             }
@@ -164,7 +159,7 @@ namespace DecorationMaster.MyBehaviour
                 orig(self);
                 On.HeroController.CanDoubleJump -= True;
                 On.HeroController.DoDoubleJump -= RemoveHook;
-                ModHooks.Instance.TakeDamageHook -= remove;
+                ModHooks.TakeDamageHook -= remove;
             }
         }
     
@@ -194,7 +189,7 @@ namespace DecorationMaster.MyBehaviour
                 if (used)
                     return;
                 used = true;
-                ModHooks.Instance.GetPlayerIntHook += Fireball2;
+                ModHooks.GetPlayerIntHook += Fireball2;
                 au.PlayOneShot(clip);
                 StartCoroutine(Consume());
 
@@ -214,7 +209,7 @@ namespace DecorationMaster.MyBehaviour
                 }
             }
 
-            private int Fireball2(string intName)
+            private int Fireball2(string intName,int orig)
             {
                 throw new NotImplementedException();
             }

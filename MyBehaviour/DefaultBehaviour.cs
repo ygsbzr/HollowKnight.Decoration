@@ -2,7 +2,6 @@
 using DecorationMaster.Util;
 using DecorationMaster.Attr;
 using UnityEngine;
-using ModCommon;
 using System.Collections;
 
 namespace DecorationMaster.MyBehaviour
@@ -20,10 +19,11 @@ namespace DecorationMaster.MyBehaviour
     [Decoration("HK_stomper")]
     [Decoration("HK_zote_head")]
     [Decoration("HK_infinte_soul")]
-
     [Decoration("HK_laser_turret")]
     [Decoration("HK_quake_floor")]
-
+    [Decoration("HK_garden_plat_s")]
+    
+    [AdditionItem(typeof(DelayItem))]
     public class DefaultBehaviour : Resizeable
     {
         [Serializable]
@@ -63,6 +63,7 @@ namespace DecorationMaster.MyBehaviour
                
         }
     }
+    
     
     public class UnVisableBehaviour : CustomDecoration
     {
