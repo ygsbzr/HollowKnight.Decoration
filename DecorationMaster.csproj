@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
-    <HKModdingApi>F:\hkMOD\1.5Moddingapi\</HKModdingApi>
+    <HKModdingApi>D:\HKMod\1.5Moddingapi\</HKModdingApi>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,7 +40,7 @@
       <HintPath>$(HKModdingApi)Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="MMHOOK_Assembly-CSharp">
-      <HintPath>E:\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\MMHOOK_Assembly-CSharp.dll</HintPath>
+      <HintPath>$(HKModdingApi)MMHOOK_Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
       <HintPath>$(HKModdingApi)MonoMod.RuntimeDetour.dll</HintPath>

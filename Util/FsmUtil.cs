@@ -134,6 +134,7 @@ namespace DecorationMaster.Util
                     if (trans.EventName == eventName)
                     {
                         trans.ToState = toState;
+                        trans.ToFsmState = fsm.GetState(toState);
                     }
                 }
             }
@@ -148,7 +149,8 @@ namespace DecorationMaster.Util
                 transitions.Add(new FsmTransition
                 {
                     FsmEvent = new FsmEvent(eventName),
-                    ToState = toState
+                    ToState = toState,
+                    ToFsmState=fsm.GetState(toState)
                 });
                 t.Transitions = transitions.ToArray();
             }
