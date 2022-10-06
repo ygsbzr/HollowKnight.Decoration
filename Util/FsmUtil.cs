@@ -106,6 +106,7 @@ namespace DecorationMaster.Util
                 actions[actions.Length - 1] = action;
 
                 t.Actions = actions;
+                action.Init(t);
             }
         }
 
